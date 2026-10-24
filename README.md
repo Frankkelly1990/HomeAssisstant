@@ -1,4 +1,4 @@
-Zigbee2MQTT Blueprint for Aqara H2 EU Dimmer switch (KD-R01D)
+Home Assistant Blueprint Aqara H2 EU Dimmer switch (KD-R01D) over Zigbee2MQTT 
 Current Features
   -Turning Dimmer Switch Adjusts Brightness of Target Light
 
