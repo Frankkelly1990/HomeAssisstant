@@ -1,0 +1,47 @@
+blueprint:
+  name: Aqara H2 Knob Brightness Control
+  description: Control a light's brightness using an Aqara H2 rotation sensor.
+  domain: automation
+
+  input:
+    rotation_sensor:
+      name: Rotation Sensor
+      description: The action_rotation_angle sensor from the H2 dimmer.
+      selector:
+        entity:
+          domain: sensor
+
+    target_light:
+      name: Target Light
+      description: The light to dim.
+      selector:
+        entity:
+          domain: light
+
+    divisor:
+      name: Sensitivity Divisor
+      description: Higher values make dimming less sensitive.
+      default: 4
+      selector:
+        number:
+          min: 1
+          max: 20
+          step: 1
+
+variables:
+  rotation_sensor: !input rotation_sensor
+  divisor: !input divisor
+
+trigger:
+  - platform: state
+    entity_id: !input rotation_sensor
+
+action:
+  - service: light.turn_on
+    target:
+      entity_id: !input target_light
+    data:
+      brightness_step_pct: >
+        {{ states(rotation_sensor) | float(0) / divisor }}
+
+mode: restart
