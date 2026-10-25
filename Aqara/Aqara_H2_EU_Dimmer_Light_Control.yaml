@@ -1,0 +1,69 @@
+blueprint:
+  name: Aqara H2 Light Control
+  description: >
+    Control a light using an Aqara H2 dimmer.
+    Single press toggles the light.
+    Rotation adjusts brightness.
+
+  domain: automation
+
+  input:
+    mqtt_topic:
+      name: Zigbee2MQTT Topic
+      description: Example zigbee2mqtt/Büro.DimmerSwitch
+
+    target_light:
+      name: Target Light
+      selector:
+        entity:
+          domain: light
+
+    sensitivity:
+      name: Dimming Sensitivity
+      description: Higher = slower dimming
+      default: 4
+      selector:
+        number:
+          min: 1
+          max: 20
+          step: 1
+
+variables:
+  sensitivity: !input sensitivity
+
+trigger:
+  - platform: mqtt
+    topic: !input mqtt_topic
+
+action:
+  - choose:
+
+      #
+      # Single press
+      #
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ trigger.payload_json.action == 'single' }}
+        sequence:
+          - service: light.toggle
+            target:
+              entity_id: !input target_light
+
+      #
+      # Rotation
+      #
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ trigger.payload_json.action == 'rotation' }}
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input target_light
+            data:
+              brightness_step_pct: >
+                {{ (trigger.payload_json.action_rotation_angle | float(0))
+                   / sensitivity }}
+
+mode: restart
